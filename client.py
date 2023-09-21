@@ -12,9 +12,9 @@ import binascii
 # EXTRA
 
 
-# serialName = "COM4"
+serialName = "COM4"
 # serialName = "COM7"
-serialName = "COM6"
+#serialName = "COM6"
 
 
 comeco = b'\x0a'
@@ -44,6 +44,7 @@ def main():
                 if resposta == 's':
                     print("Comecando")
                     # enviar msg t1 com ident
+                    com1.sendData()
 
 
                     time.sleep(5)
