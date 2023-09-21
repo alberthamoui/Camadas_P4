@@ -20,18 +20,15 @@ def main():
     try:
         print("Iniciou o main")
         com1 = enlace(serialName)
-        
-    
         com1.enable()
         print("Abriu a comunicação")
-        
         # Recebendo o Byte de inicio
         print("esperando 1 byte de inicio")
         tamanho, nRx = com1.getData(1)
-
         com1.rx.clearBuffer()
         time.sleep(.1)
         numPckg = None
+
 
         # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
         # MAIN

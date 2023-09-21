@@ -42,7 +42,7 @@ def tipo5():
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop
     
-def tipo6(posicaErro):
-    head = b'x06' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + posicaErro.to_bytes(4, byteorder='big') + b'x07' + b'x08' + b'x09'
+def tipo6(posicaoErro):
+    head = b'x06' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + posicaoErro.to_bytes(4, byteorder='big') + b'x07' + b'x08' + b'x09'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop
