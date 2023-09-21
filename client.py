@@ -33,6 +33,32 @@ def main():
         txBuffer = open(imagem, 'rb').read()
         numPack = len(txBuffer)
 
+        teste = "client\inicial.jpeg"
+        # txBuffer = open(teste, 'rb').read()
+        # pacotes = None # O QUE EH ISSO??
+        # tamPacotes = len(txBuffer)
+        # tamPacotesBytes = (tamPacotes).to_bytes(1, byteorder='big')
+        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+        txBuffer = open(teste, 'rb').read()
+
+        tamPacotes = len(txBuffer)
+
+        # Tamanho de cada payload (114 bytes)
+        tam_pacote = 114
+
+        pacotes = []
+        # Dividir os bytes da imagem em pacotes de 50 bytes
+        for i in range(0, len(txBuffer), tam_pacote):
+            pacote = txBuffer[i:i + tam_pacote]
+            pacotes.append(pacote)
+        
+        print('\n\n')
+        print(pacotes)
+        print('\n\n')
+
+        tamanho_pacotes = len(pacotes)
+
         # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         # HandShake
         comeca = False
@@ -44,13 +70,15 @@ def main():
                 if resposta == 's':
                     print("Comecando")
                     # enviar msg t1 com ident
-                    com1.sendData()
-
+                    com1.sendData(tipo1(tamanho_pacotes))
 
                     time.sleep(5)
                     # Recebeu msg t2 com ident?
-                    validado = True
-                    print("Validado")
+                    head, nRx = com1.getData(10)
+                    tipo = int(head[0])
+                    if tipo == 2:
+                        validado = True
+                        print("Validado")
 
                 elif resposta == 'n':
                     print("Encerrando")
@@ -71,20 +99,29 @@ def main():
 
         while cont <= numPack:
             # Envia pacote cont - msg t3
+            com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))    
 
             # Set timer 1
-            timer1 = None
+            timer1 = time.time()
             # Set timer 2
-            timer2 = None
+            timer2 = time.time()
 
-            t4 = True
+            head, nRx = com1.getData(10)
+            tipo = int(head[0])
+            ultimo_pacote = int(head[7])
+
+            if tipo == 4:
+                t4 = True
+            else:
+                t4 = False
             while not t4:
                 # Recebeu msg t4?
+
                 print("Erro no pacote")
                 if timer1 > 5:
                     # Envia pacote cont - msg t3
                     # Reset timer1
-                    timer1 = None
+                    timer1 = time.time()
                 if timer2 > 20:
                     # Envia msg t5
                     print("ENCERRANDO")
@@ -93,15 +130,21 @@ def main():
                     exit()
                 else:
                     # Recebeu msg t6?
-                    t6 = True
-                    if t6:
+                    head, nRx = com1.getData(10)
+                    tipo = int(head[0])
+                    posicao = int(head[6])
+
+                    if tipo == 6:
+                        t6 = True
                         # Corrige cont
+                        cont = posicao
                         # Envia pacote cont - msg t3
                         # Reset timer1 e timer2
-                        timer1 = None
-                        timer2 = None
+                        timer1 = time.time()
+                        timer2 = time.time()
                         # VOLTAR PRA RECEBEU MSG T4
-                        break
+                    else:
+                        t6 = False
 
             if t4:
                 cont += 1
