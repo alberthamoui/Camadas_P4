@@ -99,7 +99,9 @@ def main():
 
         while cont <= numPack:
             # Envia pacote cont - msg t3
-            com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))    
+            com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
+            time.sleep(.1)
+   
 
             # Set timer 1
             timer1 = time.time()
@@ -109,6 +111,8 @@ def main():
             head, nRx = com1.getData(10)
             tipo = int(head[0])
             ultimo_pacote = int(head[7])
+            com1.rx.clearBuffer()
+            time.sleep(.1)
 
             if tipo == 4:
                 t4 = True
@@ -133,6 +137,8 @@ def main():
                     head, nRx = com1.getData(10)
                     tipo = int(head[0])
                     posicao = int(head[6])
+                    com1.rx.clearBuffer()
+                    time.sleep(.1)
 
                     if tipo == 6:
                         t6 = True
