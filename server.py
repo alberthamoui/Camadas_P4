@@ -24,10 +24,6 @@ def main():
         print("Abriu a comunicação")
         # Recebendo o Byte de inicio
         print("esperando 1 byte de inicio")
-        tamanho, nRx = com1.getData(1)
-        com1.rx.clearBuffer()
-        time.sleep(.1)
-        numPckg = None
 
 
         # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -40,16 +36,21 @@ def main():
         while rodar:
             ocioso = True
             if ocioso:
-                t1 = True
-                if t1:
-                    # Eh pra mim?
-                    endereco = True
-                    if endereco:
-                        ocioso = False
-                time.sleep(1)
+                head, nRx = com1.getData(10)
+                tipo = int(head[0])
+                if tipo == 1:
+                    tamanho = int(head[3])
+                    numPckg = tamanho
+                    t1 = True
+                    ocioso = False
+                    time.sleep(1)
+                com1.rx.clearBuffer()
+                time.sleep(.1)
+
             else:
                 # Envia msg t2
                 print("Enviando msg t2")
+                com1.sendData(tipo2())
                 cont = 1
                 while cont <= numPckg:
                     # Set timer 1
@@ -57,7 +58,30 @@ def main():
                     # Set timer 2
                     timer2 = time.time()
                     # Recebeu msg t3?
-                    t3 = True
+
+                    head, nRx = com1.getData(10)
+                    tipo = int(head[0])
+                    tamanho = int(head[3])
+                    countT3 = int(head[4])
+                    com1.rx.clearBuffer()
+                    time.sleep(.1)
+
+                    if tipo == 3:
+                        t3 = True
+                        # O payload ta certo e em um pacote esperado correto?
+                        if cont == countT3:
+                            pckg = True
+                        if pckg:
+                            print("Enviando msg t4")
+                            # Envia msg t4
+                            com1.sendData(tipo4(cont))
+                            cont += 1
+                        else:
+                            print("Enviando msg t6")
+                            # Envia msg t6
+                            com1.sendData(tipo6(countT3))
+                    else:
+                        t3 = False
 
                     while not t3:
                         time.sleep(1)
@@ -65,11 +89,11 @@ def main():
                             ocioso = True
                             # Envia msg t5
                             print("Enviando msg t5")
+                            com1.sendData(tipo5())
                             print("ENCERRANDO")
                             print(":-(")
                             com1.disable()
                             exit()
-                            break
 
                         else:
                             if timer1 > 2:
@@ -79,18 +103,6 @@ def main():
                                 timer1 = None
                                 # VOLTA PRA RECEBEU T3
                                 break
-                    if t3:
-                        # O payload ta certo e em um pacote esperado correto?
-                        pckg = True
-                        if pckg:
-                            print("Enviando msg t4")
-                            # Envia msg t4
-                            cont += 1
-                        else:
-                            print("Enviando msg t6")
-                            # Envia msg t6
-
-
 
                 print("SUCESSO")
 
