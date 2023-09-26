@@ -18,31 +18,31 @@ import binascii
 # EOP – 4 bytes: 0xAA 0xBB 0xCC 0xDD
 
 def tipo1(tamanho):
-    head = b'x01' + b'xAA' + b'xAA' + tamanho.to_bytes(4, byteorder='big') + b'xAA' + b'xAA' + b'xAA' + b'xAA' + b'xAA' + b'xAA'
+    head = b'\x01' + b'xAA' + b'xAA' + tamanho.to_bytes(4, byteorder='big') + b'xAA' + b'xAA' + b'xAA' + b'xAA' + b'xAA' + b'xAA'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop
 
 def tipo2():
-    head = b'x02' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
+    head = b'\x02' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop
 
 def tipo3(payload, tamanho, count):
-    head = b'x03' + b'x01' + b'x02' + tamanho.to_bytes(4, byteorder='big') + count.to_bytes(4, byteorder='big') + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
+    head = b'\x03' + b'x01' + b'x02' + tamanho.to_bytes(4, byteorder='big') + count.to_bytes(4, byteorder='big') + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + payload + eop
 
 def tipo4(ultimo):
-    head = b'x04' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + b'x06' + ultimo.to_bytes(4, byteorder='big') + b'x08' + b'x09'
+    head = b'\x04' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + b'x06' + ultimo.to_bytes(4, byteorder='big') + b'x08' + b'x09'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop
 
 def tipo5():
-    head = b'x05' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
+    head = b'\x05' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop
     
 def tipo6(posicaoErro):
-    head = b'x06' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + posicaoErro.to_bytes(4, byteorder='big') + b'x07' + b'x08' + b'x09'
+    head = b'\x06' + b'x01' + b'x02' + b'x03' + b'x04' + b'x05' + posicaoErro.to_bytes(4, byteorder='big') + b'x07' + b'x08' + b'x09'
     eop = b'xAA' + b'xBB' + b'xCC' + b'xDD'
     return head + b'' + eop

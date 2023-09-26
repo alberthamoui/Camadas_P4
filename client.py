@@ -33,16 +33,16 @@ def main():
         txBuffer = open(imagem, 'rb').read()
         numPack = len(txBuffer)
 
-        teste = "client\inicial.jpeg"
+        # steste = "client\inicial.jpeg"
         # txBuffer = open(teste, 'rb').read()
         # pacotes = None # O QUE EH ISSO??
         # tamPacotes = len(txBuffer)
         # tamPacotesBytes = (tamPacotes).to_bytes(1, byteorder='big')
         # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        txBuffer = open(teste, 'rb').read()
+        # txBuffer = open(teste, 'rb').read()
 
-        tamPacotes = len(txBuffer)
+        # tamPacotes = len(txBuffer)
 
         # Tamanho de cada payload (114 bytes)
         tam_pacote = 114
@@ -71,11 +71,13 @@ def main():
                     print("Comecando")
                     # enviar msg t1 com ident
                     com1.sendData(tipo1(tamanho_pacotes))
-
+                    print(tipo1(tamanho_pacotes))
+                    print('enviou t1')
                     time.sleep(5)
                     # Recebeu msg t2 com ident?
                     head, nRx = com1.getData(10)
                     tipo = int(head[0])
+                    print('recebeu t2')
                     if tipo == 2:
                         validado = True
                         print("Validado")
@@ -100,6 +102,7 @@ def main():
         while cont <= numPack:
             # Envia pacote cont - msg t3
             com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
+            print('enviou tipo 3')
             time.sleep(.1)
    
 
@@ -115,19 +118,25 @@ def main():
             time.sleep(.1)
 
             if tipo == 4:
+                print('recebeu tipo 4')
                 t4 = True
             else:
+                print('n recebeu tipo 4')
                 t4 = False
             while not t4:
                 # Recebeu msg t4?
 
                 print("Erro no pacote")
                 if timer1 > 5:
+                    com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
+                    time.sleep(.1)
+                    print('enviou tipo 3 de novo')
                     # Envia pacote cont - msg t3
                     # Reset timer1
                     timer1 = time.time()
                 if timer2 > 20:
                     # Envia msg t5
+                    com1.sendData(tipo5()) 
                     print("ENCERRANDO")
                     print(":-(")
                     com1.disable()
@@ -141,6 +150,7 @@ def main():
                     time.sleep(.1)
 
                     if tipo == 6:
+                        print('recebeu t6')
                         t6 = True
                         # Corrige cont
                         cont = posicao
@@ -150,11 +160,12 @@ def main():
                         timer2 = time.time()
                         # VOLTAR PRA RECEBEU MSG T4
                     else:
+                        print('n recebeu t6')
                         t6 = False
 
             if t4:
                 cont += 1
-                print("Pacote enviado com sucesso")
+                print("Pacote 4 enviado com sucesso")
 
 
 
