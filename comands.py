@@ -28,7 +28,7 @@ def tipo2():
     return head + b'' + eop
 
 def tipo3(payload, tamanho, count):
-    head = b'\x03' + b'x01' + b'x02' + tamanho.to_bytes(1, byteorder='small') + count.to_bytes(1, byteorder='small') + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
+    head = b'\x03' + b'x01' + b'x02' + tamanho.to_bytes(1, byteorder='little') + count.to_bytes(1, byteorder='little') + b'x05' + b'x06' + b'x07' + b'x08' + b'x09'
     print(f'tamanho: {tamanho.to_bytes(1, byteorder="big")}' + 
         '\n'
         + f'count: {count.to_bytes(1, byteorder="big")}')
