@@ -77,7 +77,10 @@ def main():
                     # Recebeu msg t2 com ident?
                     head, nRx = com1.getData(10)
                     tipo = int(head[0])
+                    com1.rx.clearBuffer()
                     print('recebeu t2')
+                    print(head)
+                    print('\n')
                     if tipo == 2:
                         validado = True
                         print("Validado")
@@ -103,7 +106,9 @@ def main():
             # Envia pacote cont - msg t3
             com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
             print('enviou tipo 3')
-            time.sleep(.1)
+            print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+            print('\n')
+            time.sleep(5)
    
 
             # Set timer 1
@@ -111,8 +116,11 @@ def main():
             # Set timer 2
             timer2 = time.time()
 
+            
             head, nRx = com1.getData(10)
             tipo = int(head[0])
+            print('recebeu t4')
+            print('tipo:  {}'.format(tipo))
             ultimo_pacote = int(head[7])
             com1.rx.clearBuffer()
             time.sleep(.1)
@@ -127,14 +135,16 @@ def main():
                 # Recebeu msg t4?
 
                 print("Erro no pacote")
-                if timer1 > 5:
+                timeout1 = timer1 + 5
+                timeout2 = timer2 + 20
+                if timer1 > timeout1:
                     com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
                     time.sleep(.1)
                     print('enviou tipo 3 de novo')
                     # Envia pacote cont - msg t3
                     # Reset timer1
                     timer1 = time.time()
-                if timer2 > 20:
+                if timer2 > timeout2:
                     # Envia msg t5
                     com1.sendData(tipo5()) 
                     print("ENCERRANDO")
