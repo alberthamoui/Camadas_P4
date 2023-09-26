@@ -53,6 +53,8 @@ def main():
             pacote = txBuffer[i:i + tam_pacote]
             pacotes.append(pacote)
         
+        print(len(pacotes[-1]))
+        
         print('\n\n')
         print(pacotes)
         print('\n\n')
@@ -104,11 +106,24 @@ def main():
 
         while cont <= numPack:
             # Envia pacote cont - msg t3
-            com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
+            try:
+                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+            except:
+                # print('except')
+                # print(pacotes[cont])
+                # print('\n')
+                # print(tamanho_pacotes)
+                # print('\n')
+                # print(cont)
+                # print('\n')
+                # com1.sendData(tipo3(pacotes[cont], tamanho_pacotes, cont))
+                break
+
+            #com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('enviou tipo 3')
             print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('\n')
-            time.sleep(5)
+            #time.sleep(5)
    
 
             # Set timer 1
@@ -181,6 +196,7 @@ def main():
 
 
         print("SUCESSO")
+        print(pacotes)
 
 
 
