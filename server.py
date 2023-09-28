@@ -9,8 +9,6 @@ import io
 # serialName = "COM7"
 serialName = "COM6"
 
-
-recebidos = []
 comeco = b'\x0a'
 final = b'\x0f'
 
@@ -58,7 +56,8 @@ def main():
                     print('ocioso = false')
                     time.sleep(1)
                 com1.rx.clearBuffer()
-                time.sleep(.1)
+                time.sleep(.3)
+
                 print('volta pro while')
 
             else:
@@ -68,6 +67,7 @@ def main():
                 cont = 1
                 print('cont = 1')
 
+
                 while cont <= numPckg:
                     print("cont <= numPckg")
                     # Set timer 1
@@ -76,11 +76,44 @@ def main():
                     timer2 = time.time()
                     # Recebeu msg t3?
 
+
+                    print('1111111111')
+                    print(f'countT3: {countT3}'+ '\n\n')
+                    
+                    
                     if countT3 != 8:
+                        print('22222222222')
+                        com1.rx.getBufferLen()
+
+
+                        print('while11111111111111111111111')
+
+
+                        #trava antes desse get
+                        rxlen = 0
+                        while rxlen==0:
+                            rxlen = com1.rx.getBufferLen()
+                            
+                            time.sleep(.5)
+
                         tudo, nRx = com1.getData(128)
+                        print('while2222222222222222222222222222222222222')
+
+
+                        print('3333333333333')
+                        com1.rx.clearBuffer()
+                        time.sleep(.3)
+                        print('44444444444444')
+
                     else:
+                        print('5555555555555')
                         h2 = 46 + 14
                         tudo, nRx = com1.getData(h2)
+                        com1.rx.clearBuffer()
+                        time.sleep(.3)
+
+                    
+                    print('666666666666666666666')
                     head = tudo[:10]
                     payload = tudo[10:-4]
                     print(f'head: {head}\n\n')
@@ -88,7 +121,6 @@ def main():
                     tamanho = int(head[3])
                     countT3 = int(head[4])
                     print(f'tipo: {tipo}' + '\n' + f'tamanho: {tamanho}' + '\n' + f'countT3: {countT3}' + '\n\n')
-                    com1.rx.clearBuffer()
                     time.sleep(.1)
 
                     if tipo == 3:
@@ -102,12 +134,16 @@ def main():
                             payloads.append(payload)
                             print("Enviando msg t4")
                             # Envia msg t4
-                            com1.sendData(tipo4(cont))
-                            cont += 1
+                            c = cont
+                            while c == cont:
+                                print('while33333333333333333333333333333')
+                                com1.sendData(tipo4(cont))
+                                print('while4444444444444444444444444444')
+                                cont += 1
                         else:
                             print("Enviando msg t6")
                             # Envia msg t6
-                            com1.sendData(tipo6(countT3))
+                            com1.sendData(tipo6())
                     else:
                         t3 = False
 
@@ -116,6 +152,7 @@ def main():
                         print("not t3")
                         print(f'timer2: {timer2}')
                         timeout2 = timer2 + 20 
+                        timer2 = time.time()
                         if timer2 > timeout2:
                             ocioso = True
                             # Envia msg t5
@@ -129,6 +166,7 @@ def main():
                         else:
                             print(f'timer1: {timer1}')
                             timeout1 = timer1 + 2
+                            timer1 = time.time()
                             if timer1 > timeout1:
                                 print("Enviando msg t4")
                                 # Envia msg t4
@@ -177,8 +215,7 @@ def main():
         print("ops! :-\\")
         print(erro)
         com1.disable()
-    print(recebidos)
-        
+
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
