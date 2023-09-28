@@ -57,11 +57,9 @@ def main():
             pacote = txBuffer[i:i + tam_pacote]
             pacotes.append(pacote)
             crc = calculator.checksum(pacote)
-            crc = crc.to_bytes(2, byteorder='little')[0]+ crc.to_bytes(2, byteorder='little')[1]
             lista_crc.append(crc)
         
         print(len(pacotes[-1]))
-
         print(lista_crc)
         
         print('\n\n')
@@ -125,7 +123,7 @@ def main():
 
             
             print('enviou tipo 3')
-            print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+            #print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('\n')
             print('aaaaaaaaaaaaaaaaaaaaaaaaaaaa')
             #time.sleep(5)
