@@ -4,6 +4,7 @@ import time
 import numpy as np
 import random
 import binascii
+from crc import Calculator, Crc8, Configuration
 
 
 
@@ -23,6 +24,7 @@ final = b'\x0f'
 
 def main():
     try:
+        t4 = ''
         contador = 0
         print("Iniciou o main")
         com1 = enlace(serialName)
@@ -33,27 +35,29 @@ def main():
         txBuffer = open(imagem, 'rb').read()
         numPack = len(txBuffer)
 
-        # steste = "client\inicial.jpeg"
-        # txBuffer = open(teste, 'rb').read()
-        # pacotes = None # O QUE EH ISSO??
-        # tamPacotes = len(txBuffer)
-        # tamPacotesBytes = (tamPacotes).to_bytes(1, byteorder='big')
-        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-        # txBuffer = open(teste, 'rb').read()
-
-        # tamPacotes = len(txBuffer)
-
         # Tamanho de cada payload (114 bytes)
         tam_pacote = 114
 
         #pacote total 128 bytes
 
+        # calculadora de crc 
+        calculator = Calculator(Crc8.CCITT) 
+        config = Configuration(
+        width=8,
+        polynomial=0x07,
+        init_value=0x00,
+        final_xor_value=0x00,
+        reverse_input=False,
+        reverse_output=False,)
+
         pacotes = []
+        lista_crc = []
         # Dividir os bytes da imagem em pacotes de 50 bytes
         for i in range(0, len(txBuffer), tam_pacote):
             pacote = txBuffer[i:i + tam_pacote]
             pacotes.append(pacote)
+            crc = calculator.checksum(pacote)
+            lista_crc.append(crc)
         
         print(len(pacotes[-1]))
         
@@ -70,7 +74,8 @@ def main():
 
         while not comeca:
             if validado == False:
-                resposta = input(str("Deseja continuar? [s/n]: "))
+                # resposta = input(str("Deseja continuar? [s/n]: "))
+                resposta = 's'
                 if resposta == 's':
                     print("Comecando")
                     # enviar msg t1 com ident
@@ -104,26 +109,44 @@ def main():
         while cont <= numPack:
             # Envia pacote cont - msg t3
             try:
-                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, crc[cont-1]))
+                print('------------------------------------------------------------------------------------')
             except:
+                print('brecouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu')
                 break
 
-            #com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+            
             print('enviou tipo 3')
             print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('\n')
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaa')
             #time.sleep(5)
 
             # Set timer 1
             timer1 = time.time()
             # Set timer 2
             timer2 = time.time()
+            timer3 = 0
 
+            #trava antes desse get
+            rxlen = 0
+            while rxlen == 0:
+                rxlen = com1.rx.getBufferLen()
+                time.sleep(.5)
+                print("Esperando receber")
+                print(rxlen)
+                if time.time() - timer3 > 5:
+                    print("brecou")
+                    print(time.time()-timer3)
+                    t4 =False
+                    break
             
+
             head, nRx = com1.getData(10)
+            print(f'head: {head}')
             tipo = int(head[0])
-            print('recebeu t4')
             print('tipo:  {}'.format(tipo))
+            print('bbbbbbbbbbbbbbb')
             ultimo_pacote = int(head[7])
             com1.rx.clearBuffer()
             time.sleep(.1)
@@ -134,19 +157,24 @@ def main():
             else:
                 print('n recebeu tipo 4')
                 t4 = False
+
+
+
             while not t4:
                 # Recebeu msg t4?
 
                 print("Erro no pacote")
                 timeout1 = timer1 + 5
                 timeout2 = timer2 + 20
+                timer1 = time.time()
                 if timer1 > timeout1:
-                    com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
+                    com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, crc[cont-1])) 
                     time.sleep(.1)
                     print('enviou tipo 3 de novo')
                     # Envia pacote cont - msg t3
                     # Reset timer1
                     timer1 = time.time()
+                timer2= time.time()
                 if timer2 > timeout2:
                     # Envia msg t5
                     com1.sendData(tipo5()) 
@@ -168,7 +196,7 @@ def main():
                         # Corrige cont
                         cont = posicao
                         # Envia pacote cont - msg t3
-                        com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+                        com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, crc[cont-1]))
                         # Reset timer1 e timer2
                         timer1 = time.time()
                         timer2 = time.time()
@@ -183,167 +211,14 @@ def main():
 
 
 
-
         print("SUCESSO")
         print(pacotes)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # head = [
-        #     'tipo', # 0 
-        #     "1 ou qualquer", # 1
-        #     "livre", # 2
-        #     "qnt pacotes", # 3
-        #     "num pacote atual", # 4
-        #     "se for handshake -> id, se for dados -> tam", # 5
-        #     "pacote do erro", # 6
-        #     "ultimo pacote recebido com sucesso", # 7
-        #     "em  branco", # 8
-        #     "em  branco", # 9
-        #     ]
-        
-        # Payload -> 0-114 bytes 
-
-        # eop -> 4 bytes 0xAA 0xBB 0xCC 0xDD    
-
-        # head = b'\x00\x00\x00\x00' + b'\x00\x00\xBB\x00' + b'\xBB\x00\x00\x00'
-        
-        # eop = b'\xAA\xBB\xCC\xDD'
-
-        # handshake = head + eop
-
-        # Byte de inicio
-        # time.sleep(0.2)
-        # com1.sendData(handshake)
-        # time.sleep(2)
-
-        # # Recebendo o Byte de inicio
-        # print("esperando 1 byte de resposta")
-        # tamanho, nRx = com1.getData(1)
-
-        # com1.rx.clearBuffer()
-        # time.sleep(.1)
-
-
-
-        # teste = "inicial.jpeg"
-        # # txBuffer = open(teste, 'rb').read()
-        # # pacotes = None # O QUE EH ISSO??
-        # # tamPacotes = len(txBuffer)
-        # # tamPacotesBytes = (tamPacotes).to_bytes(1, byteorder='big')
-        # # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-        # txBuffer = open(teste, 'rb').read()
-
-        # tamPacotes = len(txBuffer)
-        # tamPacotesBytes = tamPacotes.to_bytes(4, byteorder='big')  # Use 4 bytes para representar o tamanho total
-
-        # # Tamanho de cada pacote (50 bytes)
-        # tam_pacote = 50
-
-        # pacotes = []
-        # # Dividir os bytes da imagem em pacotes de 50 bytes
-        # for i in range(0, len(txBuffer), tam_pacote):
-        #     pacote = txBuffer[i:i + tam_pacote]
-        #     pacotes.append(pacote)
-        
-        # print('\n\n')
-        # print(pacotes)
-        # print('\n\n')
-
-
-        # hs = 0
-        # envio = 1
-        # ESTADO = hs
-        
-        # timeout = time.time() + 5
-        # if len(tamanho) == 0 or time.time()>timeout:
-        #     quest = input(str("Servidor inativo. Tentar novamente? s/n : "))
-        
-        # tamanho_pacotes = len(pacotes)
-        # tamanho_pacotes_bytes = tamanho_pacotes.to_bytes(1, byteorder='big')  # Use 4 bytes para representar o tamanho
-        # #print(tamPacotesBytes)
-
-
-
-        # print('\n\n\n')
-        # ki = 0
-        # for pacote in range(len(pacotes)-1):
-        #     #envio = tamPacotesBytes + b'\x00\x00\xBB\x00' + b'\xBB\x00\x00\x00' + pacotes[pacote] + eop
-        #     envio = pacotes[pacote] 
-        #     print(envio)
-        #     com1.sendData(envio)
-        #     time.sleep(3)
-        #     ki +=1
-        #     print(ki)
-        
-        # time.sleep(3)
-        # envio = tamPacotesBytes + b'\xAA\xAA\xAA\xAA' + b'\xBB\x00\x00\x00' + pacotes[-1] + eop
-        # print('\n\n\n\n\n')
-        # print(envio)
-        # print(ki+1)
-        # time.sleep(3)
-        # com1.sendData(envio)
-        # time.sleep(2)
-
-        # time.sleep(3)
-        # com1.sendData(final)
-        # time.sleep(2)
-        
-        # # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        # # Recebendo confirmacao do server
-        # print("esperando confirmacao")
-        # confirmacao, nRx = com1.getData(1)
-        # com1.rx.clearBuffer()
-        # time.sleep(.1)
-        # print("confirmacao recebida")
-        # if confirmacao == b'\x0c':
-        #     print("TUDO CERTO")
-        #     # Encerra comunicação
-        #     time.sleep(1)
-        #     print("-------------------------")
-        #     print("Comunicação encerrada")
-        #     print("-------------------------")
-        #     com1.disable()
-
-        # else:
-        #     print("ERRO")
-        #     print("TENTAR NOVAMENTE")
 
     except Exception as erro:
         print("ops! :-\\")
         print(erro)
         com1.disable()
         
-        
-    #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
     main()
