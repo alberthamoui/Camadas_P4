@@ -47,11 +47,15 @@ def main():
         # Tamanho de cada payload (114 bytes)
         tam_pacote = 114
 
+        #pacote total 128 bytes
+
         pacotes = []
         # Dividir os bytes da imagem em pacotes de 50 bytes
         for i in range(0, len(txBuffer), tam_pacote):
             pacote = txBuffer[i:i + tam_pacote]
             pacotes.append(pacote)
+        
+        print(len(pacotes[-1]))
         
         print('\n\n')
         print(pacotes)
@@ -94,22 +98,21 @@ def main():
                 print("Comecando")
                 comeca = True
 
-        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         # Enviando Dados
         cont = 1
         
-        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        # TA COM PROBLEMA DE ZERAR OS TIMERS SEM PRECISAR ACHO
-        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
         while cont <= numPack:
             # Envia pacote cont - msg t3
-            com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont)) 
+            try:
+                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
+            except:
+                break
+
+            #com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('enviou tipo 3')
             print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('\n')
-            time.sleep(5)
-   
+            #time.sleep(5)
 
             # Set timer 1
             timer1 = time.time()
@@ -165,6 +168,7 @@ def main():
                         # Corrige cont
                         cont = posicao
                         # Envia pacote cont - msg t3
+                        com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
                         # Reset timer1 e timer2
                         timer1 = time.time()
                         timer2 = time.time()
@@ -181,6 +185,7 @@ def main():
 
 
         print("SUCESSO")
+        print(pacotes)
 
 
 
