@@ -7,7 +7,6 @@ import io
 
 # serialName = "COM3"
 # serialName = "COM7"
-# serialName = "COM6"
 serialName = "COM6"
 
 
@@ -32,6 +31,8 @@ def main():
         rodar = True
         ocioso = True
         pckg = False
+        payloads = []
+        countT3 = 0
         while rodar:
             print("rodou")
             if ocioso:
@@ -43,10 +44,9 @@ def main():
                     print("nn recebeu head")
 
 
-                print(list(head))
-                print(f'head0: {head[0]}')
+                print('\n' +f'head0: {head[0]}')
                 tipo = int(head[0])
-                print(f"tipo:{tipo}")
+                print(f"tipo:{tipo}"+'\n')
 
 
                 if tipo == 1 or head[0] == b'x01':
@@ -68,11 +68,6 @@ def main():
                 cont = 1
                 print('cont = 1')
 
-
-
-
-
-
                 while cont <= numPckg:
                     print("cont <= numPckg")
                     # Set timer 1
@@ -81,14 +76,18 @@ def main():
                     timer2 = time.time()
                     # Recebeu msg t3?
 
-                    head, nRx = com1.getData(10)
+                    if countT3 != 8:
+                        tudo, nRx = com1.getData(128)
+                    else:
+                        h2 = 46 + 14
+                        tudo, nRx = com1.getData(h2)
+                    head = tudo[:10]
+                    payload = tudo[10:-4]
                     print(f'head: {head}\n\n')
-                    print(list(head)[11:15])
                     tipo = int(head[0])
                     tamanho = int(head[3])
-                    countT3 = int(head)[4]
-                    # countT3 = sum(list(head)[11:15])
-                    print(f'tipo: {tipo}' + '\n' + f'tamanho: {tamanho}' + '\n' + f'countT3: {countT3}')
+                    countT3 = int(head[4])
+                    print(f'tipo: {tipo}' + '\n' + f'tamanho: {tamanho}' + '\n' + f'countT3: {countT3}' + '\n\n')
                     com1.rx.clearBuffer()
                     time.sleep(.1)
 
@@ -100,6 +99,7 @@ def main():
                             print("cont == countT3")
                             pckg = True
                         if pckg:
+                            payloads.append(payload)
                             print("Enviando msg t4")
                             # Envia msg t4
                             com1.sendData(tipo4(cont))
@@ -137,14 +137,35 @@ def main():
                                 timer1 = time.time()
                                 # VOLTA PRA RECEBEU T3
                                 break
-
                 print("SUCESSO")
 
 
+                print('\n\n\n\n\n\n\n'+f'payloads: {payloads}'+'\n\n\n\n\n\n\n\n')
+
+                try:
+                    # IMAGEM
+                    print(1)
+                    image_data = b''.join(payloads)
+                    print(2)
+                    byte_stream = io.BytesIO(image_data)
+                    print(3)
+                    image = Image.open(byte_stream)
+                    print(4)
+                    image.save('final.jpeg')
+                    print(5)
+                    print("FOI CARAI")
+                    com1.disable()
+                    exit()
 
 
-        
-        
+                except IOError as e:
+                    print(f"Error: {e}")
+                    print("PORRA")
+                    com1.disable()
+                    exit()
+
+
+
         # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
         # Encerra comunicação
         print("-------------------------")
