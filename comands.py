@@ -28,7 +28,8 @@ def tipo2():
     return head + b'' + eop
 
 def tipo3(payload, tamanho, count, crc):
-    head = b'\x03' + b'\x01' + b'\x02' + tamanho.to_bytes(1, byteorder='little') + count.to_bytes(1, byteorder='little') + b'\x05' + b'\x06' + b'\x07' + crc.to_bytes(2, byteorder='little')
+    # head = b'\x03' + b'\x01' + b'\x02' + tamanho.to_bytes(1, byteorder='little') + count.to_bytes(1, byteorder='little') + b'\x05' + b'\x06' + b'\x07' + crc.to_bytes(2, byteorder='little')[0]+ crc.to_bytes(2, byteorder='little')[1]
+    head = b'\x03' + b'\x01' + b'\x02' + tamanho.to_bytes(1, byteorder='little') + count.to_bytes(1, byteorder='little') + b'\x05' + b'\x06' + b'\x07' + crc[0]+ crc[1]
     print(f'tamanho: {tamanho.to_bytes(1, byteorder="big")}' + 
         '\n'
         + f'count: {count.to_bytes(1, byteorder="big")}')

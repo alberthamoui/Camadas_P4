@@ -57,9 +57,12 @@ def main():
             pacote = txBuffer[i:i + tam_pacote]
             pacotes.append(pacote)
             crc = calculator.checksum(pacote)
+            crc = crc.to_bytes(2, byteorder='little')[0]+ crc.to_bytes(2, byteorder='little')[1]
             lista_crc.append(crc)
         
         print(len(pacotes[-1]))
+
+        print(lista_crc)
         
         print('\n\n')
         print(pacotes)
@@ -109,9 +112,14 @@ def main():
         while cont <= numPack:
             # Envia pacote cont - msg t3
             try:
-                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, crc[cont-1]))
+                print('tentou')
+                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
+                print(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
                 print('------------------------------------------------------------------------------------')
             except:
+                print('fudeu')
+                print(com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1])))
+                print(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
                 print('brecouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu')
                 break
 
@@ -168,7 +176,7 @@ def main():
                 timeout2 = timer2 + 20
                 timer1 = time.time()
                 if timer1 > timeout1:
-                    com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, crc[cont-1])) 
+                    com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1])) 
                     time.sleep(.1)
                     print('enviou tipo 3 de novo')
                     # Envia pacote cont - msg t3
@@ -196,7 +204,7 @@ def main():
                         # Corrige cont
                         cont = posicao
                         # Envia pacote cont - msg t3
-                        com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, crc[cont-1]))
+                        com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
                         # Reset timer1 e timer2
                         timer1 = time.time()
                         timer2 = time.time()
