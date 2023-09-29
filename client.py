@@ -35,6 +35,10 @@ def main():
         txBuffer = open(imagem, 'rb').read()
         numPack = len(txBuffer)
 
+        print('\n\n\n\n')
+        print(f'Txbuffer: {txBuffer}, {numPack}')
+        print('\n\n\n\n')
+
         # Tamanho de cada payload (114 bytes)
         tam_pacote = 114
 
@@ -52,7 +56,7 @@ def main():
 
         pacotes = []
         lista_crc = []
-        # Dividir os bytes da imagem em pacotes de 50 bytes
+        # Dividir os bytes da imagem em pacotes de 128 bytes
         for i in range(0, len(txBuffer), tam_pacote):
             pacote = txBuffer[i:i + tam_pacote]
             pacotes.append(pacote)
@@ -115,17 +119,13 @@ def main():
                 print(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
                 print('------------------------------------------------------------------------------------')
             except:
-                print('fudeu')
                 print(com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1])))
                 print(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
-                print('brecouuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu')
                 break
 
             
             print('enviou tipo 3')
-            #print(tipo3(pacotes[cont-1], tamanho_pacotes, cont))
             print('\n')
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaa')
             #time.sleep(5)
 
             # Set timer 1
@@ -152,7 +152,6 @@ def main():
             print(f'head: {head}')
             tipo = int(head[0])
             print('tipo:  {}'.format(tipo))
-            print('bbbbbbbbbbbbbbb')
             ultimo_pacote = int(head[7])
             com1.rx.clearBuffer()
             time.sleep(.1)
