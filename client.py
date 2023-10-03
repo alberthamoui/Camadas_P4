@@ -84,8 +84,8 @@ def main():
                 if resposta == 's':
                     print("Comecando")
                     # enviar msg t1 com ident
-                    com1.sendData(tipo1(tamanho_pacotes))
-                    print(tipo1(tamanho_pacotes))
+                    com1.sendData(tipo1(tamanho_pacotes, len(pacotes[0])))
+                    print(tipo1(tamanho_pacotes, len(pacotes[0])))
                     print('enviou t1')
                     time.sleep(5)
                     # Recebeu msg t2 com ident?
@@ -112,14 +112,15 @@ def main():
         cont = 1
         
         while cont <= numPack:
+            t4 = False
             # Envia pacote cont - msg t3
             try:
                 print('tentou')
-                com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
+                com1.sendData(tipo3(pacotes[cont-1], len(pacotes[cont-1]), cont, lista_crc[cont-1]))
                 print(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
                 print('------------------------------------------------------------------------------------')
             except:
-                print(com1.sendData(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1])))
+                print(com1.sendData(tipo3(pacotes[cont-1], len(pacotes[cont-1]), cont, lista_crc[cont-1])))
                 print(tipo3(pacotes[cont-1], tamanho_pacotes, cont, lista_crc[cont-1]))
                 break
 
@@ -147,7 +148,26 @@ def main():
                     t4 =False
                     break
             
+            print('\ncalma daguinho\n')
+            timer1 = time.time()
+            timeout = timer1 + 5
+            contador10 = 0
+            while rxlen<10:
+                rxlen = com1.rx.getBufferLen()
+                print(rxlen)
+                print(f'timeout: {timeout}')
+                print(f'timer1: {timer1}')
+                print(timer1 > timeout)
+                print(contador10)
+                timer1 = time.time()
 
+                if timer1 > timeout and contador10 == 0 and timer1-timeout<20:
+                   print('enviei de novo')
+                   com1.sendData(tipo3(pacotes[cont-1], len(pacotes[cont-1]), cont, lista_crc[cont-1])) 
+                   contador10 = 1
+                if timer1 - timeout > 20:
+                    com1.disable()
+                time.sleep(.5)
             head, nRx = com1.getData(10)
             print(f'head: {head}')
             tipo = int(head[0])

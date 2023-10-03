@@ -17,9 +17,9 @@ import binascii
 # PAYLOAD – variável entre 0 e 114 bytes. Reservado à transmissão dos arquivos.
 # EOP – 4 bytes: 0xAA 0xBB 0xCC 0xDD
 eop = b'\xAA' + b'\xBB' + b'\xCC' + b'\xDD'
-def tipo1(tamanho):
+def tipo1(tamanho,esperado):
     global eop
-    head = b'\x01' + b'\xAA' + b'\xAA' + tamanho.to_bytes(1, byteorder='big') + b'\xAA' + b'\xAA' + b'\xAA' + b'\xAA' + b'\xAA' + b'\xAA'
+    head = b'\x01' + esperado.to_bytes(1, byteorder='big') + b'\xAA' + tamanho.to_bytes(1, byteorder='big') + b'\xAA' + b'\xAA' + b'\xAA' + b'\xAA' + b'\xAA' + b'\xAA'
     
     return head + b'' + eop
 
@@ -29,7 +29,7 @@ def tipo2():
     return head + b'' + eop
 
 def tipo3(payload, tamanho, count, crc):
-    head = b'\x03' + b'\x01' + b'\x02' + tamanho.to_bytes(1, byteorder='little') + count.to_bytes(1, byteorder='little') + b'\x05' + b'\x06' + b'\x07' + crc.to_bytes(1, byteorder='little') + b'\x09'
+    head = b'\x03' + b'\x01' + b'\x02' + tamanho.to_bytes(1, byteorder='big') + count.to_bytes(1, byteorder='little') + b'\x05' + b'\x06' + b'\x07' + crc.to_bytes(1, byteorder='little') + b'\x09'
     print(f'tamanho: {tamanho.to_bytes(1, byteorder="big")}' + 
         '\n'
         + f'count: {count.to_bytes(1, byteorder="big")}')
